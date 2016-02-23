@@ -12,13 +12,14 @@ CSRMat::CSRMat(void)
 
 }
 
+// Destructor
+CSRMat::~CSRMat(void)
+{
+}
+
 CSRMat::CSRMat(std::string fileName)
 {
-	if (readCSRFile(fileName) == 0)
-	{
-		std::cout << "Congrats\n";
-	}
-	else
+	if (readCSRFile(fileName) != 0)
 	{
 		std::cout << "Error\n";
 	}
@@ -31,20 +32,109 @@ CSRMat::CSRMat(double vals[], int colIndx[], int rowPtr[])
 }
 
 
-// Multiplication of the current CSR Matrix with another CSR Matrix
-CSRMat CSRMat::Multiply(CSRMat matB)
+// Copy a given matrix over to current matrix
+CSRMat::CSRMat(CSRMat* givenMatrix)
 {
-	CSRMat val;
+	int gmValSize = givenMatrix->vals.size();
+	int gmColSize = givenMatrix->colIndx.size();
+	int gmRowSize = givenMatrix->rowIndx.size();
 
-	return val;
+	for (int i = 0; i < gmValSize; ++i)
+		vals.push_back(givenMatrix->vals[i]);
+
+	for (int i = 0; i < gmColSize; ++i)
+		colIndx.push_back(givenMatrix->colIndx[i]);
+
+	for (int i = 0; i < gmRowSize; ++i)
+		rowIndx.push_back(givenMatrix->rowIndx[i]);
+
+	m_value_count = givenMatrix->m_value_count;
+	m_column_count = givenMatrix->m_column_count;
+	m_row_count = givenMatrix->m_row_count;
+}
+
+
+// Multiplication of the current CSR Matrix with a scalar value
+void CSRMat::MulScalar(double s)
+{
+	for (int i = 0; i < m_value_count; ++i)
+	{
+		vals[i] = s*vals[i];
+	}
+}
+
+// Mutiply current matrix with the given matrix
+void CSRMat::MulMatrix(CSRMat mul)
+{
+	// check if this matrix row size == to given matrix column size
+	try
+	{
+		if (m_row_count != mul.getColumnCount())
+		{
+			throw 1;
+		}
+		else
+		{
+			// Multiply the matrix
+		}
+
+	}
+	catch (int e)
+	{
+		std::cout << "Error " << e << " - Column size and row size mismatch.";
+	}
+	return;
 }
 
 // Takes the current CSR Matrix and transposes it
-CSRMat CSRMat::Transpose()
+void CSRMat::Transpose()
 {
+    //http://www.cs.laurentian.ca/jdompierre/html/CPSC5006E_F2010/cours/sparse_3_storage_BW.pdf
 	CSRMat val;
 
-	return val;
+	for (int i = 0; i < m_value_count; ++i)
+	{
+		for (int k = rowIndx[i]; k < rowIndx[i + 1] - 1; ++k)
+		{
+
+		}
+	}
+}
+
+
+// Transpose a given matrix
+// Takes in nothing
+// Returns the current CSRMatrix transposed
+CSRMat CSRMat::getTransposed(CSRMat givenMat)
+{
+	CSRMat result;
+
+	result = new CSRMat(givenMat);
+	result.Transpose();
+
+	return result;
+}
+
+// Make this matrix an identity matrix with the given columns and rows
+void CSRMat::Identity(int r, int c)
+{
+	m_row_count = r;
+	m_column_count = c;
+
+	rowIndx.push_back(0);
+
+	for (int i = 0; i < r; ++i)
+	{
+		vals.push_back(1);
+		colIndx.push_back(i);
+		rowIndx.push_back(i);
+	}
+}
+
+// Make this matrix an identity with rxr size
+void CSRMat::Identity(int r)
+{
+	Identity(r, r);
 }
 
 // Checks if the current CSR Matrix is a symmetric matrix
@@ -55,7 +145,38 @@ bool CSRMat::isSymmetric()
 	return val;
 }
 
+
+// Prints the CSR Matrix
+// Takes in nothing
+// Returns nothing
+void CSRMat::print()
+{
+	int vArrSize = vals.size();
+	int cArrSize = colIndx.size();
+	int rArrSize = rowIndx.size();
+
+	std::cout << "Rows: [" << m_row_count << "]" << std::endl
+		<< "Columns: [" << m_column_count << "]" << std::endl;
+
+	std::cout << "Values: [";
+	for (int i = 0; i < vArrSize; ++i)
+		std::cout << vals[i] << " ";
+
+	std::cout << "]\n" << "Columns: [";
+	for (int i = 0; i < cArrSize; ++i)
+		std::cout << colIndx[i] << " ";
+
+	std::cout << "]\n" << "Row Pointer: [";
+	for (int i = 0; i < rArrSize; ++i)
+		std::cout << rowIndx[i] << " ";
+
+	std::cout << "]" << std::endl << std::endl;
+}
+
+
 // Reads in a CSR formatted file
+// Takes in a file name string
+// Returns nothing
 /* Format is as follows:
 	    val = [0, 1, 2, 2, 4]
 		cIndx = [0, 0, 1, 2]
@@ -64,16 +185,18 @@ bool CSRMat::isSymmetric()
 int CSRMat::readCSRFile(std::string strFile)
 {
 	std::ifstream file;
-	// Vectors that store file read values temporarily
-	std::vector<double> weights;
-	std::vector<int> colIndex;
-	std::vector<int> rowPointer;
 	// Temp vars for reading in values from file
 	double dNum = 0.0;
 	int iNum = 0;
+	int col = 0;
+	int colCnt = 0;
+	int rowCnt = 1;
+	bool rowFlag = false;
 	char strTitle[50];
-	std::string temp;
+	std::string line;
 
+
+	// ====== Read in File ======
 	file.open(strFile);  // Open the file
 
 	if (!file.is_open()) {
@@ -81,47 +204,49 @@ int CSRMat::readCSRFile(std::string strFile)
 		return -1;
 	}
 
-	std::getline(file, temp);
-	// http://stackoverflow.com/questions/19887232/how-to-loop-through-a-string-by-space-how-do-i-know-the-index-no-of-the-word-i
-	while (!file.eof())
+	//std::getline(file, line);  // Prime the pump
+
+	while (!file.eof())  // Loop through every line in file
 	{
-		// find "val = ["
-		while (file >> dNum)
-			weights.push_back(dNum);
-		// if next char is ], then go to next line
+		std::getline(file, line);  // Get the next line
 
-		// Find "cIndx = ["
-		while (file >> iNum)
-			colIndex.push_back(iNum);
-		// if next char is ], then go to next line
+		std::stringstream stream(line);  // Use stream to convert string to stream
+		colCnt = 0;  // Init cindex to be 1 for beginning of every row
 
-		// Find "rowPtr = ["
-		while (file >> iNum)
-			rowPointer.push_back(iNum);
-		// if next char is ], then finish reading in file
+		while (stream)
+		{
+			double n = 0;
+			stream >> n;  // put value into n
 
-		std::getline(file, temp);
+			// Check incoming value
+			if (n > 0)
+			{
+			  vals.push_back(n);  // Add the value to the list
+			  ++m_value_count;
+			  colIndx.push_back(colCnt);  // Add the column index of 
+
+			  if (!rowFlag)  // Row value has not been set
+			  {
+				  rowIndx.push_back(colIndx.size() - 1);
+				  rowFlag = true;
+			  }
+			  //else
+				  //rowIndx.push_back(NULL);
+			}
+			
+			++colCnt;  // Increment the column count
+		}
+
+		++rowCnt;  // Increment the row
+		rowFlag = false;  // Reset row flag
 	}
+
+	rowIndx.push_back(colIndx.size());
+	m_row_count = rowCnt - 1;
+	m_column_count = colCnt - 1;
 
 	file.close();
-
-	//verify that the weights were stored correctly:
-	std::cout << "\n Weights:\n";
-	for (int i = 0; i < weights.size(); ++i) {
-		std::cout << weights[i] << std::endl;
-	}
-
-	std::cout << "\n colIndx:\n";
-	for (int i = 0; i < colIndex.size(); ++i) {
-		std::cout << colIndex[i] << std::endl;
-	}
-
-	std::cout << "\n rowPtr:\n";
-	for (int i = 0; i < rowPointer.size(); ++i) {
-		std::cout << rowPointer[i] << std::endl;
-	}
-
-	// Allocate memory for arrays
-
+	
 	return 0;
 }
+

@@ -3,25 +3,39 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <sstream>
 
 #ifndef _INCL_CSRMAT_H_
 #define _INCL_CSRMAT_H_
 
 class CSRMat {
   // Variables
-	double * vals;   // Matrix non zero values
-	int * colIndx;   // Column values
-	int * rowPtr;    // Row begin pointer values
+	std::vector<double> vals;   // Matrix non zero values
+	std::vector<int> colIndx;   // Column values
+	std::vector<int> rowIndx;    // Row begin pointer values
+	int m_row_count = 0;
+	int m_column_count = 0;
+	int m_value_count = 0;
 
   // Function declaration
   public:
 	CSRMat(void);
-	CSRMat(std::string strFile);
+	~CSRMat(void);
+	CSRMat(std::string strFile);  // Pass in a file to load a matrix into an CSR matrix
+	CSRMat(int r, int c);  // Create a new matrix with r rows and c columns
+	CSRMat(CSRMat* given);
 	CSRMat(double vals[], int colIndx[], int rowPtr[]);
-	CSRMat Multiply(CSRMat matB);
-	CSRMat Transpose();
+	void MulScalar(double s);
+	void MulMatrix(CSRMat mul);
+	void Identity(int r, int c);
+	void Identity(int r);
+	static CSRMat getTransposed(CSRMat givenMatrix);
+	void Transpose();
 	bool isSymmetric();
 	int readCSRFile(std::string strFile);
+	void print();
+	int getRowCount() { return m_row_count; }
+	int getColumnCount() { return m_column_count; }
 };
 
 #endif

@@ -6,7 +6,13 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-	CSRMat mat = CSRMat("Matrix.txt");
+	CSRMat mat1 = CSRMat("Matrix1.txt");
+	CSRMat mat2 = CSRMat("Matrix2.txt");
+	CSRMat mat3 = CSRMat("Matrix4.txt");
+
+	mat1.print();
+	mat2.print();
+	mat3.print();
 
 	return 0;
 }
