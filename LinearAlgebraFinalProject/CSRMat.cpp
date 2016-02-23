@@ -91,14 +91,34 @@ void CSRMat::Transpose()
 {
     //http://www.cs.laurentian.ca/jdompierre/html/CPSC5006E_F2010/cours/sparse_3_storage_BW.pdf
 	CSRMat val;
+	std::vector<std::tuple<double, int, int>> tempList;
+	int rowT = 0;
+	int cnt = vals.size();
 
-	for (int i = 0; i < m_value_count; ++i)
+	for (int i = 0; i < m_row_count; ++i)
 	{
-		for (int k = rowIndx[i]; k < rowIndx[i + 1] - 1; ++k)
+		int nextRItem = 0;
+		if ((i+1) < rowIndx.size())
+			nextRItem = rowIndx[i + 1];
+		for (int j = rowIndx[i]; j < nextRItem; ++j)
 		{
+			//std::tuple<double, int, int>
+			auto tempTu  = std::make_tuple (vals[j], i+1, colIndx[j]);  // temporary tuple
+			tempList.push_back(tempTu);  // Add to the list
 
+			std::cout << "( " << std::get<0>(tempTu)
+				<< ", " << std::get<2>(tempTu)
+				<< ", " << std::get<1>(tempTu)
+				<< " )  ----> ";
+
+			std::cout << "( " << std::get<0>(tempTu)
+				<< ", " << std::get<1>(tempTu)
+				<< ", " << std::get<2>(tempTu)
+				<< " )" << std::endl;
 		}
 	}
+
+	std::cout << std::endl;
 }
 
 
@@ -158,15 +178,15 @@ void CSRMat::print()
 	std::cout << "Rows: [" << m_row_count << "]" << std::endl
 		<< "Columns: [" << m_column_count << "]" << std::endl;
 
-	std::cout << "Values: [";
+	std::cout << "Values: \t[";
 	for (int i = 0; i < vArrSize; ++i)
 		std::cout << vals[i] << " ";
 
-	std::cout << "]\n" << "Columns: [";
+	std::cout << "]\n" << "Columns: \t[";
 	for (int i = 0; i < cArrSize; ++i)
 		std::cout << colIndx[i] << " ";
 
-	std::cout << "]\n" << "Row Pointer: [";
+	std::cout << "]\n" << "Row Pointer: \t[";
 	for (int i = 0; i < rArrSize; ++i)
 		std::cout << rowIndx[i] << " ";
 

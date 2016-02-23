@@ -4,6 +4,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <tuple>
 
 #ifndef _INCL_CSRMAT_H_
 #define _INCL_CSRMAT_H_

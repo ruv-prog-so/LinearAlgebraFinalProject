@@ -10,8 +10,10 @@ int main(int argc, char *argv[])
 	CSRMat mat2 = CSRMat("Matrix2.txt");
 	CSRMat mat3 = CSRMat("Matrix4.txt");
 
-	mat1.print();
-	mat2.print();
+	//mat1.print();
+	//mat2.print();
+	
+	mat3.Transpose();
 	mat3.print();
 
 	return 0;
