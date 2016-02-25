@@ -87,14 +87,17 @@ void CSRMat::MulMatrix(CSRMat mul)
 }
 
 // Takes the current CSR Matrix and transposes it
+// Takes in nothing
+// Returns nothing
 void CSRMat::Transpose()
 {
-    //http://www.cs.laurentian.ca/jdompierre/html/CPSC5006E_F2010/cours/sparse_3_storage_BW.pdf
 	CSRMat val;
 	std::vector<std::tuple<double, int, int>> tempList;
 	int rowT = 0;
 	int cnt = vals.size();
 
+
+	// Parse CSR format to tuples of three values
 	for (int i = 0; i < m_row_count; ++i)
 	{
 		int nextRItem = 0;
@@ -105,20 +108,42 @@ void CSRMat::Transpose()
 			//std::tuple<double, int, int>
 			auto tempTu  = std::make_tuple (vals[j], i+1, colIndx[j]);  // temporary tuple
 			tempList.push_back(tempTu);  // Add to the list
-
-			std::cout << "( " << std::get<0>(tempTu)
-				<< ", " << std::get<2>(tempTu)
-				<< ", " << std::get<1>(tempTu)
-				<< " )  ----> ";
-
-			std::cout << "( " << std::get<0>(tempTu)
-				<< ", " << std::get<1>(tempTu)
-				<< ", " << std::get<2>(tempTu)
-				<< " )" << std::endl;
 		}
 	}
 
-	std::cout << std::endl;
+	// Sort the temp list
+	std::sort(tempList.begin(), tempList.end(), [](auto const &t1, auto const &t2) {
+		return std::get<2>(t1) < std::get<2>(t2);
+	});
+
+	vals.clear(); // Clear the values
+	rowIndx.clear(); // Clear the row indexes
+	colIndx.clear(); // Clear the column indexes
+	
+	int tmpRowCnt = m_row_count;  // Reset the counters
+	m_row_count = m_column_count;
+	m_column_count = tmpRowCnt;
+
+	int prevColIndx = 0;
+	int tListSize = tempList.size();
+	rowIndx.push_back(0); // For beginning of index
+
+	// Loop through the list to create a new array
+	for (int i = 0; i < tListSize; ++i)
+	{
+		std::tuple<double, int, int> tempT = tempList[i];
+		int colI = std::get<1>(tempT);
+
+		vals.push_back(std::get<0>(tempT)); // Add the new value to the vals list
+		colIndx.push_back(colI); // Add the new value to the col index list
+
+		if (prevColIndx >= colI)
+			rowIndx.push_back(i);  // Add the current column index to the row index list
+
+		prevColIndx = colI;  // Set the previous column index for next iteration
+		if (i == (tListSize - 1))
+			rowIndx.push_back(i + 1); // Add the last index for the col index
+	}
 }
 
 
@@ -212,7 +237,6 @@ int CSRMat::readCSRFile(std::string strFile)
 	int colCnt = 0;
 	int rowCnt = 1;
 	bool rowFlag = false;
-	char strTitle[50];
 	std::string line;
 
 
@@ -270,3 +294,9 @@ int CSRMat::readCSRFile(std::string strFile)
 	return 0;
 }
 
+// For comparing tuples with three values
+// Takes and compares the third item in the tuple
+//bool CSRMat::compareTuple(const std::tuple<double, int, int> lhs, const std::tuple<double, int, int> rhs)
+//{
+//	return std::get<2>(lhs) < std::get<2>(rhs);
+//}

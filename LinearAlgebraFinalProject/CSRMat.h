@@ -5,6 +5,7 @@
 #include <string>
 #include <sstream>
 #include <tuple>
+#include <algorithm>
 
 #ifndef _INCL_CSRMAT_H_
 #define _INCL_CSRMAT_H_
@@ -19,6 +20,9 @@ class CSRMat {
 	int m_value_count = 0;
 
   // Function declaration
+  private:
+	bool compareTuple(const std::tuple<double, int, int> lhs, const std::tuple<double, int, int> rhs);
+
   public:
 	CSRMat(void);
 	~CSRMat(void);
