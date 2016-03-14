@@ -123,33 +123,53 @@ vector<double> CSRMat::MulVector(vector<double> *vect)
 // Mutiply current matrix with the given matrix
 // Takes in a CSRMat object
 // Returns a CSRMat object
-CSRMat CSRMat::MulByMat(CSRMat mulMat)
+CSRMat CSRMat::MulByMat(CSRMat *mulMat)
 {
 	// check if this matrix row size == to given matrix column size
-	CSRMat result(m_row_count, mulMat.getColumnCount());  // the result will be this size
+	CSRMat result(m_row_count, mulMat->getColumnCount());  // the result will be this size
 
-	try
-	{
-		if (m_row_count != mulMat.getColumnCount())
+	try	{
+		if (m_row_count != mulMat->getColumnCount())
 			throw ROW_COL_MISMATCH;
 		
 		// given const SparseMatrix & m
 		
-		int rowSum;
+		double rowSum;
+		vector<double> vals1;
+		vector<double> vals2; // This is the given matrix values
+		vector<double> rowResult(m_row_count, 0); // Init the row result
+
+		cout << "\nMultiplication\n";
 
 		// Loop through the row index array
-		for (int i = 1; i <= row_indx_list.size(); i++) {
+		for (int i = 0; i < row_indx_list.size(); i++) {
+			rowSum = 0;
+			int nextRowIndx = row_indx_list[i + 1];
+			
 			// Loop through the given matrix columns
-			for (int j = 1; j <= mulMat.getColumnCount(); j++) {
-				rowSum = 0;
-				// Loop through the column index
-				for (int k = 1; k <= m_column_count; k++) {
-					double a = getValueAt(i, k);
-					double b = mulMat.getValueAt(k, j);
-					rowSum += a*b;
-				}
+			for (int j = 0; j < mulMat->getRowCount(); j++) {
+				vals2.push_back(mulMat->vals_list[j]); // Add the column to the vals2 list
+			}
 
-				result.setValueAt(rowSum, i, j);  // Places the row sum into the matrix
+			// Loop through the column index
+			for (int k = 0; k < m_column_count; k++) {
+				double a = vals_list[k];
+				double b = mulMat->vals_list[k];
+				//double a = getValueAt(i, k);
+				//double b = mulMat.getValueAt(k, j);
+				rowSum += a*b;
+			}
+			cout << "rowSum:\t " << rowSum << endl;
+
+			//Loop through thr results
+			for (int indx = 0; indx < m_row_count; ++indx) {
+				for (int col = 0; col < rowResult.size(); ++col) {
+					if (rowResult[i] > 0) {
+						result.vals_list.push_back(12);   // Places the row sum into the matrix
+						result.col_indx_list.push_back(0); // Add to the columns list
+					}
+				}
+				result.row_indx_list.push_back(0); // Add to the rows
 			}
 		}
 		return result;

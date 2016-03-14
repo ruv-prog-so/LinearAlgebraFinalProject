@@ -47,7 +47,7 @@ class CSRMat {
 	
 	void MulScalar(double s);
 	vector<double> MulVector(vector<double> *vect);
-	CSRMat MulByMat(CSRMat mul);
+	CSRMat MulByMat(CSRMat *mul);
 	
 	void Identity(int r, int c);
 	void Identity(int r);

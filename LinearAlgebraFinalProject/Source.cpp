@@ -13,8 +13,8 @@ void checkAdjFileInput();
 int main(int argc, char *argv[])
 {
 	//checkTranspose();
-	checkMultiplyVector();
-	//checkMultiplyMat();
+	//checkMultiplyVector();
+	checkMultiplyMat();
 	//checkIdentity();
 	//checkAdjFileInput();
 
@@ -59,8 +59,8 @@ void checkMultiplyVector()
 void checkMultiplyMat()
 {
 	cout << "\n============ Multiplying Mat by Mat =============\n";
-	CSRMat mat1 = CSRMat("Matrix4.txt", 1, true);
-	CSRMat mat2 = CSRMat("Matrix4t.txt", 1, true);
+	CSRMat mat1 = CSRMat("Matrix3.txt", 1, true);
+	CSRMat mat2 = CSRMat("Matrix3b.txt", 1, true);
 	CSRMat matRes = CSRMat();
 
 	
