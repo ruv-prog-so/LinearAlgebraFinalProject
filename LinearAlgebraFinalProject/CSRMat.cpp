@@ -106,9 +106,14 @@ vector<double> CSRMat::MulVector(vector<double> *vect)
 
 	vector<double> result(m_row_count, 0);  // Initialize the result vector
 
-	for (int i = 1; i <= m_row_count; i++) {
-		for (int j = 1; j <= m_column_count; j++) {
-			result[i - 1] += (getValueAt(i, j)*(vect->at(j - 1)));
+	for (int i = 0; i <= m_row_count-1; i++) {
+		int nextRow = row_indx_list[i + 1];
+
+		for (int j = row_indx_list[i]; j < nextRow; ++j) {
+			int col = col_indx_list[j];
+			double vectVal = vect->at(col);
+			double matVal = vals_list[j];
+			result[i] += (matVal*vectVal);
 		}
 	}
 
@@ -563,7 +568,7 @@ double CSRMat::getValueAt(int row, int col)
 		throw OUT_OF_RANGE;
 
 	double result = 0;
-	int colVal = row_indx_list[row - 1]-1; // get the column
+	int colVal = row_indx_list[row - 1]; // get the column
 
 	// Start at row index
 	for (int i = colVal; i < row_indx_list[row]-1; ++i) {

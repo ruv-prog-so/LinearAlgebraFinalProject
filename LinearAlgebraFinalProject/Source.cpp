@@ -12,8 +12,8 @@ void checkAdjFileInput();
 
 int main(int argc, char *argv[])
 {
-	checkTranspose();
-	//checkMultiplyVector();
+	//checkTranspose();
+	checkMultiplyVector();
 	//checkMultiplyMat();
 	//checkIdentity();
 	//checkAdjFileInput();
@@ -36,20 +36,24 @@ void checkTranspose()
 
 void checkMultiplyVector()
 {
-	cout << "\n============ Multiplying Vector by Mat =============\n";
+	cout << "\n============ Multiplying Vector by Vect =============\n";
 	CSRMat mat2 = CSRMat("Matrix3.txt", 1, true);
 	vector<double> vect(mat2.getColumnCount());
-	vect = {2, 3, 1, 5};
+	vect = {2, 3, 1, 5, 9, 1};
 
 	cout << endl << "Vector values: [";
 	for (int i = 0; i < vect.size(); ++i)
 		cout << vect[i] << " ";
-	cout << "]\n";
+	cout << "]\n\n";
 
 	mat2.print();
 	cout << "\n----- Multiplied Result: -----\n";
-	mat2.MulVector(&vect);
-	mat2.print();
+	vector<double> res = mat2.MulVector(&vect);
+	
+	cout << endl << "Result Vector values: [";
+	for (int i = 0; i < res.size(); ++i)
+		cout << res[i] << " ";
+	cout << "]\n";
 }
 
 void checkMultiplyMat()
