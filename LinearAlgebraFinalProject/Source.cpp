@@ -4,19 +4,92 @@
 
 using namespace std;
 
+void checkTranspose();
+void checkMultiplyVector();
+void checkMultiplyMat();
+void checkIdentity();
+void checkAdjFileInput();
+
 int main(int argc, char *argv[])
 {
-	CSRMat mat1 = CSRMat("Matrix1.txt");
-	CSRMat mat2 = CSRMat("Matrix2.txt");
-	CSRMat mat4 = CSRMat("Matrix4.txt");
-	CSRMat mat4t = CSRMat("Matrix4t.txt");
-
-	//mat1.print();
-	//mat2.print();
-	mat4t.print();
-	mat4.print();
-	mat4.Transpose();
-	mat4.print();
+	checkTranspose();
+	//checkMultiplyVector();
+	//checkMultiplyMat();
+	//checkIdentity();
+	//checkAdjFileInput();
 
 	return 0;
+}
+
+// Checks the transpose function
+void checkTranspose()
+{
+	cout << "\n============ Matrix Transpose =============\n";
+	CSRMat mat4 = CSRMat("Matrix_sym2_partial.txt", 1, false);
+	cout << "\n ----- Mat Original -----\n";
+	mat4.print();
+
+	cout << "\n ----- Mat Transposed -----\n";
+	mat4.Transpose();
+	mat4.print();
+}
+
+void checkMultiplyVector()
+{
+	cout << "\n============ Multiplying Vector by Mat =============\n";
+	CSRMat mat2 = CSRMat("Matrix3.txt", 1, true);
+	vector<double> vect(mat2.getColumnCount());
+	vect = {2, 3, 1, 5};
+
+	cout << endl << "Vector values: [";
+	for (int i = 0; i < vect.size(); ++i)
+		cout << vect[i] << " ";
+	cout << "]\n";
+
+	mat2.print();
+	cout << "\n----- Multiplied Result: -----\n";
+	mat2.MulVector(&vect);
+	mat2.print();
+}
+
+void checkMultiplyMat()
+{
+	cout << "\n============ Multiplying Mat by Mat =============\n";
+	CSRMat mat1 = CSRMat("Matrix4.txt", 1, true);
+	CSRMat mat2 = CSRMat("Matrix4t.txt", 1, true);
+	CSRMat matRes = CSRMat();
+
+	
+	cout << "\n----- Mat 1 --------\n";
+	mat1.print();
+	
+	cout << "\n----- Mat 2 --------\n";
+	mat2.print();
+
+	cout << "\n----- Multiplied Result: ------\n";
+	matRes = mat1.MulByMat(mat2);
+	matRes.print();
+}
+
+void checkIdentity()
+{
+	cout << "\n============ Create an Identity Mat =============\n";
+	CSRMat mat1 = CSRMat();
+	CSRMat matId44 = CSRMat("Matrix_Zero.txt", 1, true);
+	mat1.Identity(5,3);
+	mat1.print();
+}
+
+void checkAdjFileInput()
+{
+	cout << "\n============ Check Graph List file input =============\n";
+	CSRMat matAdj = CSRMat("test1.edgelist", 2, true);
+
+	cout << "\n----- ADJ MAT -----\n";
+	matAdj.print();
+
+	/*if (matAdj.isSymmetric())
+	cout << "MatAdj is symmetric\n";
+	else
+	cout << "MatAdj is not symmetric\n";*/
 }
